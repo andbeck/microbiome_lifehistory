@@ -7,3 +7,9 @@ Data and scripts to accompany manuscript.  A three way factorial experiment on D
 Contains two data files: life history data and micribiome OTU data
 Contains two script files: life history analysis and microbiome community composition analyisis
 
+To use: launch RStudio using the microbiome_lh.RProj file
+open either or both .R files from the files tab
+check to make sure packages are installed on your machine
+run code at will
+
+Running on R4.0.2 @ 25.08.2020
