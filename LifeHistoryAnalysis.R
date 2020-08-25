@@ -8,7 +8,7 @@ library(gridExtra)
 library(broom)
 
 # get the data ----
-lh_dat <- read_xlsx("./Life History Data/Life history data.RLH_SS.xlsx")
+lh_dat <- read_xlsx("Life history data.RLH_SS.xlsx")
 glimpse(lh_dat)
 
 # preliminary graphing ----

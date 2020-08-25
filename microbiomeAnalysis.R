@@ -12,16 +12,9 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install('phyloseq')
 library(phyloseq)
 
-# import data at various scales (CHOOSE) ----
+# import data at genus scale ----
 
-trim_data<- read_delim("./RTLGenomics_Guts/AnalysisB/TrimmedTaxa.genus.counts.txt",
-                          delim = "\t")
-# trim_data <- read_delim("./RTLGenomics_Guts/AnalysisB/TrimmedTaxa.family.counts.txt",
-#                          delim = "\t")
-# trim_data <- read_delim("./RTLGenomics_Guts/AnalysisB/TrimmedTaxa.order.counts.txt",
-#                         delim = "\t")
-# trim_data <- read_delim("./RTLGenomics_Guts/AnalysisB/TrimmedTaxa.class.counts.txt",
-#                         delim = "\t")
+trim_data<- read_delim("TrimmedTaxa.genus.counts.txt",delim = "\t")
 
 glimpse(trim_data)
 head(trim_data)
