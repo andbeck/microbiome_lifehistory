@@ -63,6 +63,8 @@ pSize <- ggplot(sumDat, aes(x = Cu, y = meanSize,
   geom_errorbar(width = 0.1, position = position_dodge(width = 0.9))+
   facet_wrap(~Antibiotic)+ylab("Mean Size at Maturity")+
   scale_colour_manual(values = c(Control = "black", Kairomone = "Red"))+
+  xlab("Copper (µg/l)")+
+  scale_x_continuous(breaks = c(0,5))+
   theme_bw()+ggtitle("A")+
   theme(legend.title=element_blank())
 
@@ -76,6 +78,8 @@ pAge <- ggplot(sumDat, aes(x = Cu, y = meanAge,
   geom_errorbar(width = 0.1, position = position_dodge(width = 0.9))+
   facet_wrap(~Antibiotic)+ylab("Mean Age at Maturity")+
   scale_colour_manual(values = c(Control = "black", Kairomone = "Red"))+
+  xlab("Copper (µg/l)")+
+  scale_x_continuous(breaks = c(0,5))+
   theme_bw()+ggtitle("B")+
   theme(legend.title=element_blank())
 
@@ -89,6 +93,8 @@ pGR <- ggplot(sumDat, aes(x = Cu, y = meanGR,
   geom_errorbar(width = 0.1, position = position_dodge(width = 0.9))+
   facet_wrap(~Antibiotic)+ylab("Mean Growth Rate")+
   scale_colour_manual(values = c(Control = "black", Kairomone = "Red"))+
+  xlab("Copper (µg/l)")+
+  scale_x_continuous(breaks = c(0,5))+
   theme_bw()+ggtitle("C")+
   theme(legend.title=element_blank())
 
@@ -102,6 +108,8 @@ pRepro <- ggplot(sumDat, aes(x = Cu, y = meanRepro,
   geom_errorbar(width = 0.1, position = position_dodge(width = 0.9))+
   facet_wrap(~Antibiotic)+ylab("Mean Reproduction")+
   scale_colour_manual(values = c(Control = "black", Kairomone = "Red"))+
+  xlab("Copper (µg/l)")+
+  scale_x_continuous(breaks = c(0,5))+
   theme_bw()+ggtitle("D")+
   theme(legend.title=element_blank())
 
@@ -115,6 +123,8 @@ pInd <- ggplot(sumDat, aes(x = Cu, y = meanInd,
   geom_errorbar(width = 0.1, position = position_dodge(width = 0.9))+
   facet_wrap(~Antibiotic)+ylab("Mean Induction")+
   scale_colour_manual(values = c(Control = "black", Kairomone = "Red"))+
+  xlab("Copper (µg/l)")+
+  scale_x_continuous(breaks = c(0,5))+
   theme_bw()+ggtitle("E")+
   theme(legend.title=element_blank())
 
@@ -129,6 +139,8 @@ pLipid <- ggplot(sumDat, aes(x = Cu, y = meanLipid,
   facet_wrap(~Antibiotic)+ylab("Mean Condition")+
   scale_colour_manual(values = c(Control = "black", Kairomone = "Red"))+
   theme_bw()+ggtitle("F")+
+  xlab("Copper (µg/ml)")+
+  scale_x_continuous(breaks = c(0,5))+
   theme(legend.title=element_blank())
 
 # arrange the plots
@@ -139,8 +151,11 @@ grid.arrange(pSize,pAge,pGR,pRepro,pInd,pLipid, nrow = 2)
 # overall MANOVA - three way interaction on phenotype
 mv_LH <- lm(cbind(Size_at_Maturity, Age_at_Maturity, Growth_Rate,
                   `Clutch Size`, Neckteeth_Induction, Lipid_Index) ~ Cu*JuJu*Antibiotic, data = lh_dat)
-Manova(mv_LH, univariate = TRUE)
-summary(Manova(mv_LH), univariate = TRUE, multivariate = FALSE)
+Man_out <- Manova(mv_LH, univariate = TRUE)
+Man_out
+summary(Man_out, univariate = TRUE, multivariate = FALSE)
+
+
 
 # univariate models
 mod_size <- lm(Size_at_Maturity ~ Cu*JuJu*Antibiotic, data = lh_dat)
@@ -158,29 +173,46 @@ a5 <- Anova(mod_ind)
 a6 <- Anova(mod_lipid)
 
 ##  collect anova tables
-out_table <- bind_rows(a1, a2, a3, a4, a5, a6) %>% 
-  mutate(term = rep(rownames(a1), 6),
-         model = rep(c("size","age","gr","repr","ind","lipid"), each = 8)) %>% 
-  select(model, term, `Sum Sq`, Df, `F value`, `Pr(>F)`) %>% 
+# out_table <- tidy(bind_rows(a1, a2, a3, a4, a5, a6)) %>% 
+#   mutate(term = rep(c("Cu","Predation","Antibiotic", 
+#                       "Cu:Predation", "Predation:Antibiotic", "Cu:Antibiotic",
+#                       "Cu:Predation:Antibiotic","Residuals"), 6),
+#          model = rep(c("size","age","gr","repr","ind","lipid"), each = 8)) %>% 
+#   select(model, term, `Sum Sq`, Df, `F value`, `Pr(>F)`) %>% 
+#   mutate(sig = case_when(
+#     `Pr(>F)` < 0.05 & `Pr(>F)` >= 0.01 ~ "*",
+#     `Pr(>F)` < 0.01 & `Pr(>F)` >= 0.001 ~ "**",
+#     `Pr(>F)` < 0.001 ~ "***",
+#     `Pr(>F)` >= 0.05 ~ "")) %>% 
+#   filter(., !grepl("Residuals", term))
+
+out_table <- tidy(bind_rows(a1, a2, a3, a4, a5, a6)) %>% 
+  mutate(term = rep(c("Cu","Predation","Antibiotic", 
+                      "Cu:Predation", "Predation:Antibiotic", "Cu:Antibiotic",
+                      "Cu:Predation:Antibiotic","Residuals"), 6),
+         model = rep(c("size","age","gr","repr","ind","lipid"), each = 8)) %>%
+  select(model, term, sumsq, df, statistic, p.value) %>% 
   mutate(sig = case_when(
-    `Pr(>F)` < 0.05 & `Pr(>F)` >= 0.01 ~ "*",
-    `Pr(>F)` < 0.01 & `Pr(>F)` >= 0.001 ~ "**",
-    `Pr(>F)` < 0.001 ~ "***",
-    `Pr(>F)` >= 0.05 ~ "")) %>% 
+        p.value < 0.05 & p.value >= 0.01 ~ "*",
+        p.value < 0.01 & p.value >= 0.001 ~ "**",
+        p.value < 0.001 ~ "***",
+        p.value >= 0.05 ~ "")) %>% 
   filter(., !grepl("Residuals", term))
 
 out_table
-#write_csv(out_table, path = "allTrait_Models.csv")
+write_csv(out_table, file = "allTrait_Model_univariateANOVA.csv")
 
 
 # CONTROL/NO ANTIBIOTIC ONLY MODELS ----
 
 mv_LH_II <- lm(cbind(Size_at_Maturity, Age_at_Maturity, Growth_Rate,
                   `Clutch Size`, Neckteeth_Induction, Lipid_Index) ~ Cu*JuJu, 
-               filter(lh_dat, Antibiotic == "Control"))
-Manova(mv_LH_II, univariate = TRUE)
+               data = filter(lh_dat, Antibiotic == "Control"))
 
+Man_out_controls <- Manova(mv_LH_II, univariate = TRUE)
+Man_out_controls
 
+# univariate ANOVAs - no antibiotics
 mod_size_II <- lm(Size_at_Maturity ~ Cu*JuJu, data = filter(lh_dat, Antibiotic == "Control"))
 Anova(mod_size_II)
 
@@ -199,9 +231,23 @@ Anova(mod_ind_II)
 mod_lipid_II <- lm(Lipid_Index ~ Cu*JuJu, data = filter(lh_dat, Antibiotic == "Control"))
 Anova(mod_lipid_II)
 
-a1 <- Anova(mod_size)
-a2 <- Anova(mod_age)
-a3 <- Anova(mod_GR)
-a4 <- Anova(mod_repro)
-a5 <- Anova(mod_ind)
-a6 <- Anova(mod_lipid)
+a1_c <- Anova(mod_size_II)
+a2_c <- Anova(mod_age_II)
+a3_c <- Anova(mod_GR_II)
+a4_c <- Anova(mod_repro_II)
+a5_c <- Anova(mod_ind_II)
+a6_c <- Anova(mod_lipid_II)
+
+out_table_control <- tidy(bind_rows(a1_c, a2_c, a3_c, a4_c, a5_c, a6_c)) %>% 
+  mutate(term = rep(c("Cu","Predation","Cu:Predation","Residuals"), 6),
+         model = rep(c("size","age","gr","repr","ind","lipid"), each = 4)) %>%
+  select(model, term, sumsq, df, statistic, p.value) %>% 
+  mutate(sig = case_when(
+    p.value < 0.05 & p.value >= 0.01 ~ "*",
+    p.value < 0.01 & p.value >= 0.001 ~ "**",
+    p.value < 0.001 ~ "***",
+    p.value >= 0.05 ~ "")) %>% 
+  filter(., !grepl("Residuals", term))
+
+out_table_control
+write_csv(out_table_control, file = "allTrait_Model_univariateANOVA_NoAntibiotic.csv")
