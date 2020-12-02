@@ -152,10 +152,9 @@ grid.arrange(pSize,pAge,pGR,pRepro,pInd,pLipid, nrow = 2)
 mv_LH <- lm(cbind(Size_at_Maturity, Age_at_Maturity, Growth_Rate,
                   `Clutch Size`, Neckteeth_Induction, Lipid_Index) ~ Cu*JuJu*Antibiotic, data = lh_dat)
 Man_out <- Manova(mv_LH, univariate = TRUE)
+
+# for reporting
 Man_out
-summary(Man_out, univariate = TRUE, multivariate = FALSE)
-
-
 
 # univariate models
 mod_size <- lm(Size_at_Maturity ~ Cu*JuJu*Antibiotic, data = lh_dat)
@@ -173,18 +172,6 @@ a5 <- Anova(mod_ind)
 a6 <- Anova(mod_lipid)
 
 ##  collect anova tables
-# out_table <- tidy(bind_rows(a1, a2, a3, a4, a5, a6)) %>% 
-#   mutate(term = rep(c("Cu","Predation","Antibiotic", 
-#                       "Cu:Predation", "Predation:Antibiotic", "Cu:Antibiotic",
-#                       "Cu:Predation:Antibiotic","Residuals"), 6),
-#          model = rep(c("size","age","gr","repr","ind","lipid"), each = 8)) %>% 
-#   select(model, term, `Sum Sq`, Df, `F value`, `Pr(>F)`) %>% 
-#   mutate(sig = case_when(
-#     `Pr(>F)` < 0.05 & `Pr(>F)` >= 0.01 ~ "*",
-#     `Pr(>F)` < 0.01 & `Pr(>F)` >= 0.001 ~ "**",
-#     `Pr(>F)` < 0.001 ~ "***",
-#     `Pr(>F)` >= 0.05 ~ "")) %>% 
-#   filter(., !grepl("Residuals", term))
 
 out_table <- tidy(bind_rows(a1, a2, a3, a4, a5, a6)) %>% 
   mutate(term = rep(c("Cu","Predation","Antibiotic", 
@@ -199,6 +186,7 @@ out_table <- tidy(bind_rows(a1, a2, a3, a4, a5, a6)) %>%
         p.value >= 0.05 ~ "")) %>% 
   filter(., !grepl("Residuals", term))
 
+# for reporting
 out_table
 write_csv(out_table, file = "allTrait_Model_univariateANOVA.csv")
 
@@ -210,6 +198,8 @@ mv_LH_II <- lm(cbind(Size_at_Maturity, Age_at_Maturity, Growth_Rate,
                data = filter(lh_dat, Antibiotic == "Control"))
 
 Man_out_controls <- Manova(mv_LH_II, univariate = TRUE)
+
+# for reporting
 Man_out_controls
 
 # univariate ANOVAs - no antibiotics
@@ -231,6 +221,7 @@ Anova(mod_ind_II)
 mod_lipid_II <- lm(Lipid_Index ~ Cu*JuJu, data = filter(lh_dat, Antibiotic == "Control"))
 Anova(mod_lipid_II)
 
+# Type II tests
 a1_c <- Anova(mod_size_II)
 a2_c <- Anova(mod_age_II)
 a3_c <- Anova(mod_GR_II)
@@ -238,6 +229,7 @@ a4_c <- Anova(mod_repro_II)
 a5_c <- Anova(mod_ind_II)
 a6_c <- Anova(mod_lipid_II)
 
+# collect for reporting
 out_table_control <- tidy(bind_rows(a1_c, a2_c, a3_c, a4_c, a5_c, a6_c)) %>% 
   mutate(term = rep(c("Cu","Predation","Cu:Predation","Residuals"), 6),
          model = rep(c("size","age","gr","repr","ind","lipid"), each = 4)) %>%
