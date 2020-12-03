@@ -187,7 +187,7 @@ out_table <- tidy(bind_rows(a1, a2, a3, a4, a5, a6)) %>%
   filter(., !grepl("Residuals", term)) 
   
 out_table <- out_table %>% 
-  mutate(across(where(is.numeric) , round, 3))
+  mutate(across(where(is.numeric) , signif, 3))
 
 
 # for reporting
@@ -246,6 +246,6 @@ out_table_control <- tidy(bind_rows(a1_c, a2_c, a3_c, a4_c, a5_c, a6_c)) %>%
   filter(., !grepl("Residuals", term))
 
 out_table_control <- out_table_control %>% 
-  mutate(across(where(is.numeric) , round, 3))
+  mutate(across(where(is.numeric) , signif, 3))
 
 write_csv(out_table_control, file = "allTrait_Model_univariateANOVA_NoAntibiotic.csv")
